@@ -1,0 +1,10 @@
+{
+  "mode": "gateway-midkill",
+  "requests": 60,
+  "ok": 0,
+  "fail": 60,
+  "cache_hits": 0,
+  "tokens": 0,
+  "lat_avg": 0.8,
+  "lat_p95": 1.1
+}

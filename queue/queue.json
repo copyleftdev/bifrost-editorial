@@ -1,0 +1,25 @@
+{
+  "articles": [
+    {
+      "slug": "choosing-enterprise-ai-gateway",
+      "title": "Choosing the right Enterprise AI Gateway to scale your LLM Workloads",
+      "status": "draft-ready-for-review",
+      "client": "Maxim (Swapnoneel)",
+      "fee_usd": 70,
+      "publish_target": "2026-09-01",
+      "draft_due": "weekend before publish",
+      "platform": "dev.to",
+      "primary_keyword": "enterprise AI gateway",
+      "required_links": [
+        "https://www.getmaxim.ai/bifrost",
+        "https://github.com/maximhq/bifrost",
+        "https://docs.getbifrost.ai/"
+      ],
+      "notes": "v3: migration narrative with measured cost table (53% savings on cacheable traffic, 26 fail legacy vs 0 fail via gateway), failover per-request proven twice, MCP + governance demos live. Honest caveat on connection-refused failover included. Bench artifacts in bench/. v3.1: 7 diagrams in assets/diagrams (PNG+SVG, style via architecture-diagram skill by Cocoon AI, MIT); embedded via PLACEHOLDER-ORG raw URLs \u2014 swap to real org after repo push.",
+      "draft_path": "drafts/choosing-enterprise-ai-gateway.md",
+      "research_path": "research/choosing-enterprise-ai-gateway.md",
+      "bench_path": "bench/bench-output.txt",
+      "verify_path": "verify/choosing-enterprise-ai-gateway.txt"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "client": {
+    "enable_logging": false,
+    "initial_pool_size": 100
+  },
+  "providers": {
+    "openai": {
+      "keys": [
+        {
+          "name": "primary",
+          "value": "mock-key",
+          "weight": 1.0,
+          "models": [
+            "support-chat"
+          ]
+        }
+      ],
+      "network_config": {
+        "base_url": "http://host.docker.internal:9001",
+        "allow_private_network": true,
+        "default_request_timeout_in_seconds": 10,
+        "max_retries": 0
+      }
+    },
+    "anthropic": {
+      "keys": [
+        {
+          "name": "backup",
+          "value": "mock-key",
+          "weight": 1.0,
+          "models": [
+            "support-chat"
+          ]
+        }
+      ],
+      "network_config": {
+        "base_url": "http://host.docker.internal:9002",
+        "allow_private_network": true,
+        "default_request_timeout_in_seconds": 10,
+        "max_retries": 0
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "mode": "legacy-down",
+  "requests": 60,
+  "ok": 34,
+  "fail": 26,
+  "cache_hits": 0,
+  "tokens": 5280,
+  "lat_avg": 117.1,
+  "lat_p95": 201.1
+}

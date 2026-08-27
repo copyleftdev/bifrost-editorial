@@ -1,0 +1,14 @@
+# Additional benches: cache / governance / MCP
+=== CACHE: run2 of two identical requests (cache key bench-1) ===
+{"id":"chatcmpl-mock","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"answered-by:provider-openai"}}],"created":1787815894,"model":"mock","object":"chat.completion","system_fingerprint":"","usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2},"extra_fields":{"request_type":"chat_completion","routing_info":{"provider":"openai","model":"support-chat","key":"primary"},"provider":"openai","original_model_requested":"support-chat","resolved_model_used":"support-chat","latency":0,"upstream_latency":0,"chunk_index":0,"cache_debug":{"cache_hit":true,"cache_id":"1cf8a91b-c115-57bf-97a0-fc821dc4de1e","hit_type":"direct","requested_provider":"openai","requested_model":"support-chat","cache_hit_latency":0}}}
+
+=== GOVERNANCE: VK allows support-chat (vk-allowed.json) ===
+{"id":"chatcmpl-mock","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"answered-by:provider-openai"}}],"created":1787816520,"model":"mock","object":"chat.completion","system_fingerprint":"","usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2},"extra_fields":{"request_type":"chat_completion","routing_info":{"provider":"openai","model":"support-chat","key":"primary"},"provider":"openai","original_model_requested":"support-chat","resolved_model_used":"support-chat","latency":0,"upstream_latency":0,"chunk_index":0,"cache_debug":{"cache_hit":false,"cache_id":"fea7c24f-61b5-574e-91fd-c9931db58f9d"}}}
+
+=== GOVERNANCE: same VK denied premium-model (vk-denied.json) ===
+{"type":"model_blocked","is_bifrost_error":false,"status_code":403,"error":{"message":"Model 'premium-model' is not allowed for this virtual key"},"extra_fields":{"routing_info":{},"provider":"openai","original_model_requested":"premium-model","resolved_model_used":"premium-model","request_type":"chat_completion"}}
+
+=== MCP: client 'benchtools' (hand-rolled JSON-RPC mock) discovered ===
+GET /api/mcp/clients -> state: healthy, tools: [get_time]
+=== MCP: execute through gateway -> POST /v1/mcp/tool/execute name=benchtools-get_time ===
+{"role":"tool","content":"2026-08-27T07:48:48.713953+00:00"}

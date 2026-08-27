@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "client": {
+    "enable_logging": false,
+    "initial_pool_size": 100
+  },
+  "vector_store": {
+    "enabled": true,
+    "type": "redis",
+    "config": {
+      "addr": "host.docker.internal:6379",
+      "db": 0
+    }
+  },
+  "plugins": [
+    {
+      "enabled": true,
+      "name": "semantic_cache",
+      "config": {
+        "dimension": 1,
+        "vector_store_namespace": "BifrostBenchCache",
+        "default_cache_key": "bench-cache",
+        "ttl": "5m"
+      }
+    }
+  ],
+  "mcp": {
+    "client_configs": [
+      {
+        "name": "bench-tools",
+        "connection_type": "http",
+        "connection_string": "http://host.docker.internal:9003",
+        "auth_type": "none",
+        "tools_to_execute": ["*"]
+      }
+    ]
+  },
+  "governance": {
+    "virtual_keys": [
+      {
+        "id": "vk-support-team",
+        "name": "support-team-key",
+        "value": "sk-bf-bench-support-team",
+        "is_active": true,
+        "provider_configs": [
+          {
+            "provider": "openai",
+            "weight": 1.0,
+            "allowed_models": ["support-chat"],
+            "key_ids": ["*"]
+          }
+        ]
+      }
+    ]
+  },
+  "providers": {
+    "openai": {
+      "keys": [
+        { "name": "primary", "value": "mock-key", "weight": 1.0, "models": ["support-chat"] }
+      ],
+      "network_config": {
+        "base_url": "http://host.docker.internal:9001",
+        "allow_private_network": true,
+        "default_request_timeout_in_seconds": 10,
+        "max_retries": 0
+      }
+    },
+    "anthropic": {
+      "keys": [
+        { "name": "backup", "value": "mock-key", "weight": 1.0, "models": ["support-chat"] }
+      ],
+      "network_config": {
+        "base_url": "http://host.docker.internal:9002",
+        "allow_private_network": true,
+        "default_request_timeout_in_seconds": 10,
+        "max_retries": 0
+      }
+    }
+  }
+}

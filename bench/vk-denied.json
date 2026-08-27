@@ -1,0 +1,1 @@
+{"type":"model_blocked","is_bifrost_error":false,"status_code":403,"error":{"message":"Model 'premium-model' is not allowed for this virtual key"},"extra_fields":{"routing_info":{},"provider":"openai","original_model_requested":"premium-model","resolved_model_used":"premium-model","request_type":"chat_completion"}}

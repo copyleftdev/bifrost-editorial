@@ -1,0 +1,20 @@
+# Bifrost bench: failover + routing observability
+# date: 2026-08-27T07:14:04Z
+# setup: docker maximhq/bifrost:latest, two mock OpenAI-compatible providers
+#   provider-openai  : host:9001 (config: openai, key 'primary')
+#   provider-anthropic: host:9002 (config: anthropic, key 'backup')
+# request body (both runs):
+{"model":"openai/support-chat","messages":[{"role":"user","content":"hi"}],"fallbacks":["anthropic/support-chat"]}
+
+=== RUN 1: primary healthy ===
+{"id":"chatcmpl-mock","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"answered-by:provider-openai"}}],"created":1787814809,"model":"mock","object":"chat.completion","system_fingerprint":"","usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2},"extra_fields":{"request_type":"chat_completion","routing_info":{"provider":"openai","model":"support-chat","key":"primary"},"provider":"openai","original_model_requested":"support-chat","resolved_model_used":"support-chat","latency":0,"upstream_latency":0,"chunk_index":0}}
+
+
+=== RUN 2: primary process killed, same request ===
+{"id":"chatcmpl-mock","choices":[{"index":0,"message":{"role":"assistant","content":null}}],"created":1787814826,"model":"mock","object":"chat.completion","system_fingerprint":"","usage":{"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0},"total_tokens":0},"extra_fields":{"request_type":"chat_completion","routing_info":{"provider":"anthropic","model":"support-chat","key":"backup","is_fallback":true,"primary_provider":"openai","primary_model":"support-chat"},"provider":"anthropic","original_model_requested":"support-chat","resolved_model_used":"support-chat","latency":0,"upstream_latency":0,"chunk_index":0}}
+
+=== RUN 3: gateway latency (50 sequential requests, localhost, mock upstream) ===
+n=50 min=0.9ms p50=1.0ms p95=1.5ms max=2.0ms
+Note: includes mock upstream (~0ms). Gateway overhead is sub-millisecond on loopback.
+Vendor claims <100us overhead at 5k RPS; this bench only confirms localhost overhead,
+not the 5k RPS figure.

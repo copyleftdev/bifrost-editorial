@@ -1,0 +1,10 @@
+{
+  "mode": "gateway",
+  "requests": 60,
+  "ok": 60,
+  "fail": 0,
+  "cache_hits": 32,
+  "tokens": 9335,
+  "lat_avg": 96.1,
+  "lat_p95": 202.5
+}
