@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="440" viewBox="0 0 880 440">
+<defs>
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+    <path d="M0,0 L8,4 L0,8 Z" fill="#64748b"/>
+  </marker>
+</defs>
+<rect width="880" height="440" fill="#020617"/>
+<rect width="880" height="440" fill="url(#grid)"/>
+<text x="30" y="36" fill="#f1f5f9" font-size="17" font-family="monospace" font-weight="bold">6 · Issue virtual keys per team</text>
+  <rect x="60" y="110" width="180" height="60" rx="8" fill="#0f172a"/>
+  <rect x="60" y="110" width="180" height="60" rx="8" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="150.0" y="136.0" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="monospace" font-weight="bold">Support Team</text>
+  <text x="150.0" y="153.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">vk: support-chat only</text>
+  <rect x="60" y="200" width="180" height="60" rx="8" fill="#0f172a"/>
+  <rect x="60" y="200" width="180" height="60" rx="8" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="150.0" y="226.0" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="monospace" font-weight="bold">Billing Team</text>
+  <text x="150.0" y="243.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">vk: own budget</text>
+  <rect x="60" y="290" width="180" height="60" rx="8" fill="#0f172a"/>
+  <rect x="60" y="290" width="180" height="60" rx="8" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="150.0" y="316.0" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="monospace" font-weight="bold">Research Team</text>
+  <text x="150.0" y="333.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">vk: premium models</text>
+  <line x1="240" y1="140" x2="340" y2="200" stroke="#fb7185" stroke-width="1.5" marker-end="url(#ah)" stroke-dasharray="6,4"/>
+  <line x1="240" y1="230" x2="340" y2="235" stroke="#fb7185" stroke-width="1.5" marker-end="url(#ah)" stroke-dasharray="6,4"/>
+  <line x1="240" y1="320" x2="340" y2="270" stroke="#fb7185" stroke-width="1.5" marker-end="url(#ah)" stroke-dasharray="6,4"/>
+  <rect x="340" y="190" width="200" height="110" rx="8" fill="#0f172a"/>
+  <rect x="340" y="190" width="200" height="110" rx="8" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"/>
+  <text x="440.0" y="241.0" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="monospace" font-weight="bold">Bifrost Governance</text>
+  <text x="440.0" y="258.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">allowlists · budgets · rate limits</text>
+  <line x1="540" y1="245" x2="630" y2="245" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah)"/>
+  <rect x="630" y="205" width="190" height="70" rx="8" fill="#0f172a"/>
+  <rect x="630" y="205" width="190" height="70" rx="8" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="725.0" y="236.0" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="monospace" font-weight="bold">Providers</text>
+  <text x="725.0" y="253.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">per-key access enforced first</text><text x="340" y="330" fill="#fb7185" font-size="9" font-family="monospace">denied at the gateway: "Model X is not allowed for this virtual key"</text></svg>

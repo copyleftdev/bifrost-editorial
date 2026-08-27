@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="440" viewBox="0 0 880 440">
+<defs>
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+    <path d="M0,0 L8,4 L0,8 Z" fill="#64748b"/>
+  </marker>
+</defs>
+<rect width="880" height="440" fill="#020617"/>
+<rect width="880" height="440" fill="url(#grid)"/>
+<text x="30" y="36" fill="#f1f5f9" font-size="17" font-family="monospace" font-weight="bold">5 · Enable semantic caching</text>
+  <rect x="60" y="180" width="200" height="70" rx="8" fill="#0f172a"/>
+  <rect x="60" y="180" width="200" height="70" rx="8" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="160.0" y="211.0" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="monospace" font-weight="bold">Copilot</text>
+  <text x="160.0" y="228.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">FAQ-heavy traffic</text>
+  <line x1="260" y1="215" x2="330" y2="215" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah)"/>
+  <rect x="330" y="170" width="200" height="90" rx="8" fill="#0f172a"/>
+  <rect x="330" y="170" width="200" height="90" rx="8" fill="rgba(251,146,60,0.25)" stroke="#fb923c" stroke-width="1.5"/>
+  <text x="430.0" y="211.0" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="monospace" font-weight="bold">Bifrost</text>
+  <text x="430.0" y="228.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">semantic_cache plugin</text>
+  <line x1="530" y1="195" x2="620" y2="165" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah)"/><text x="575.0" y="174.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">cache miss</text>
+  <line x1="430" y1="260" x2="430" y2="320" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah)"/>
+  <rect x="330" y="320" width="200" height="60" rx="8" fill="#0f172a"/>
+  <rect x="330" y="320" width="200" height="60" rx="8" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="430.0" y="346.0" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="monospace" font-weight="bold">Vector Store</text>
+  <text x="430.0" y="363.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">Redis Stack (direct + similarity)</text>
+  <rect x="620" y="130" width="200" height="60" rx="8" fill="#0f172a"/>
+  <rect x="620" y="130" width="200" height="60" rx="8" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="720.0" y="156.0" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="monospace" font-weight="bold">Provider</text>
+  <text x="720.0" y="173.0" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace"></text><text x="330" y="405" fill="#a78bfa" font-size="9" font-family="monospace">measured: 32/60 requests served from cache · 53% token cost cut</text></svg>
