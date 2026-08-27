@@ -11,7 +11,7 @@ This is a migration story. The legacy stack: a customer-support copilot whose ap
 
 ## The legacy world, measured
 
-![Step 1: legacy direct-to-provider architecture](https://raw.githubusercontent.com/PLACEHOLDER-ORG/bifrost-editorial/main/assets/diagrams/step1-legacy.png)
+![Step 1: legacy direct-to-provider architecture](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step1-legacy.png)
 
 The traffic pattern is a realistic support mix: 60 requests — 40 FAQ-style prompts (8 distinct questions, each asked 5 times) and 20 one-off questions. Provider latency: 200 ms. Legacy mode hits the provider directly:
 
@@ -33,37 +33,37 @@ Seven steps, each small and reversible. Diagrams follow the same flow.
 
 ### Step 1 — Deploy the gateway beside the app
 
-![Step 2: gateway deployed beside the app](https://raw.githubusercontent.com/PLACEHOLDER-ORG/bifrost-editorial/main/assets/diagrams/step2-beside.png)
+![Step 2: gateway deployed beside the app](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step2-beside.png)
 
 Deploy Bifrost (`docker run -p 8080:8080 maximhq/bifrost`) and configure your existing provider and key in it. Nothing user-facing changes yet — same key, same provider, one new hop.
 
 ### Step 2 — Point one low-risk client at the gateway
 
-![Step 3: one client pointed at gateway](https://raw.githubusercontent.com/PLACEHOLDER-ORG/bifrost-editorial/main/assets/diagrams/step3-one-client.png)
+![Step 3: one client pointed at gateway](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step3-one-client.png)
 
 The [drop-in OpenAI-compatible API](https://docs.getbifrost.ai/providers/supported-providers/overview) means the client change is a base URL, not a rewrite. Other services stay direct until their turn.
 
 ### Step 3 — Add a fallback provider
 
-![Step 4: fallback provider added](https://raw.githubusercontent.com/PLACEHOLDER-ORG/bifrost-editorial/main/assets/diagrams/step4-fallback.png)
+![Step 4: fallback provider added](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step4-fallback.png)
 
 Attach request-level fallbacks (`fallbacks: ["anthropic/support-chat"]`). Cross-provider failover without touching app code — and the response tells you which path it took.
 
 ### Step 4 — Turn on caching
 
-![Step 5: semantic caching enabled](https://raw.githubusercontent.com/PLACEHOLDER-ORG/bifrost-editorial/main/assets/diagrams/step5-cache.png)
+![Step 5: semantic caching enabled](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step5-cache.png)
 
 [Semantic caching](https://docs.getbifrost.ai/features/semantic-caching) replays exact matches (and, with an embedding provider, similar ones). FAQ-heavy workloads are the obvious first candidate — measured effect below.
 
 ### Step 5 — Issue virtual keys per team
 
-![Step 6: virtual keys per team](https://raw.githubusercontent.com/PLACEHOLDER-ORG/bifrost-editorial/main/assets/diagrams/step6-virtual-keys.png)
+![Step 6: virtual keys per team](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step6-virtual-keys.png)
 
 Every team gets its own [virtual key](https://docs.getbifrost.ai/features/governance/virtual-keys) with model allowlists, budgets, and rate limits. This is the step that makes the platform team popular.
 
 ### Steps 6–7 — Wire observability, then cut over
 
-![Step 7: cutover complete](https://raw.githubusercontent.com/PLACEHOLDER-ORG/bifrost-editorial/main/assets/diagrams/step7-cutover.png)
+![Step 7: cutover complete](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step7-cutover.png)
 
 Prometheus-native [observability](https://docs.getbifrost.ai/features/observability/default) plugs into your existing Grafana. Then cut over the remaining clients one at a time, with the gateway's request logs as the audit trail.
 
