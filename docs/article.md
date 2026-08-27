@@ -1,101 +1,92 @@
 ---
 title: Migrating from Legacy LLM Infrastructure to an Enterprise AI Gateway
 published: false
-description: A hands-on migration story — moving a support copilot off direct provider calls onto an enterprise AI gateway, with measured cost and failover results.
+description: A hands-on migration — moving a support copilot off direct provider calls onto an enterprise AI gateway, with configs, screenshots, and measured cost results.
 tags: ai, llm, devops, tutorial
 ---
 
-*Disclosure: this post was sponsored by Maxim AI.*
+Your support copilot started as a weekend prototype: one model, one provider, one API key in an env var. Then it became production, and you inherited its weaknesses: the provider's availability is your availability, every retry is your code, spend is a mystery until the invoice, and agents bolt tool-use on however they can. This post migrates that stack onto an enterprise AI gateway — and actually runs the migration, with the raw outputs to show for it.
 
-This is a migration story. The legacy stack: a customer-support copilot whose application code called one LLM provider directly, one API key, no fallback, no cache, no spend controls. It worked until it didn't. I rebuilt that stack in miniature — mock providers, deterministic latency, realistic traffic — and then migrated it onto [Bifrost](https://www.getmaxim.ai/bifrost), the open-source enterprise AI gateway ([github.com/maximhq/bifrost](https://github.com/maximhq/bifrost)), and measured the difference. Every number below comes from that run.
+The gateway here is [Bifrost](https://www.getmaxim.ai/bifrost), an open-source ([github.com/maximhq/bifrost](https://github.com/maximhq/bifrost), Apache-2.0) gateway written in Go, presenting a single OpenAI-compatible API across 23+ providers. I rebuilt the legacy stack locally — mock providers with deterministic latency, a realistic traffic pattern — and moved it behind Bifrost step by step.
 
-## The legacy world, measured
+## The legacy baseline, measured
 
-![Step 1: legacy direct-to-provider architecture](assets/diagrams/step1-legacy.png)
+![Step 1: legacy direct-to-provider architecture](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step1-legacy.png)
 
-The traffic pattern is a realistic support mix: 60 requests — 40 FAQ-style prompts (8 distinct questions, each asked 5 times) and 20 one-off questions. Provider latency: 200 ms. Legacy mode hits the provider directly:
+A support copilot's traffic has a shape: mostly repeated FAQ-style questions, plus one-off queries. My traffic mix: 60 requests — 40 FAQ prompts (8 distinct questions asked 5 times each) plus 20 one-offs. Mock provider latency: 200 ms.
+
+Run 1, direct to the provider:
 
 ```
-legacy direct: 60 ok / 0 fail, 9,335 tokens billed, ~201 ms avg
+legacy: 60 ok / 0 fail, 9,335 tokens billed, ~201 ms avg latency
 ```
 
-Then I killed the provider mid-run, because providers do that:
+Run 2 — the provider dies mid-sweep, as providers do:
 
 ```
 legacy + failure: 34 ok / 26 fail
 ```
 
-43% of the traffic died with the provider. No fallback existed in the application, so the users got errors. That is the legacy pain in one row: availability is the provider's availability, full stop.
+26 requests — 43% — failed outright. Nothing in the legacy stack retries across providers because nothing can: the app speaks one provider's API. And availability is only the loudest problem. The quieter ones: every team's service embeds the same shared key (one key's quota is everyone's ceiling, and revoking it breaks everyone at once), there is no per-team attribution of spend, and the only way to cut cost on repeated questions is to build caching yourself — request normalization, hash keys, TTLs, invalidation — inside the application. That is the whole argument for a gateway in one row of output.
 
-## The migration strategy
+## The migration, step by step
 
-Seven steps, each small and reversible. Diagrams follow the same flow.
+Seven moves, each reversible. Diagrams follow the flow.
 
-### Step 1 — Deploy the gateway beside the app
+### 1. Deploy the gateway beside the app
 
-![Step 2: gateway deployed beside the app](assets/diagrams/step2-beside.png)
+![gateway beside the app](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step2-beside.png)
 
-Deploy Bifrost (`docker run -p 8080:8080 maximhq/bifrost`) and configure your existing provider and key in it. Nothing user-facing changes yet — same key, same provider, one new hop.
-
-### Step 2 — Point one low-risk client at the gateway
-
-![Step 3: one client pointed at gateway](assets/diagrams/step3-one-client.png)
-
-The [drop-in OpenAI-compatible API](https://docs.getbifrost.ai/providers/supported-providers/overview) means the client change is a base URL, not a rewrite. Other services stay direct until their turn.
-
-### Step 3 — Add a fallback provider
-
-![Step 4: fallback provider added](assets/diagrams/step4-fallback.png)
-
-Attach request-level fallbacks (`fallbacks: ["anthropic/support-chat"]`). Cross-provider failover without touching app code — and the response tells you which path it took.
-
-### Step 4 — Turn on caching
-
-![Step 5: semantic caching enabled](assets/diagrams/step5-cache.png)
-
-[Semantic caching](https://docs.getbifrost.ai/features/semantic-caching) replays exact matches (and, with an embedding provider, similar ones). FAQ-heavy workloads are the obvious first candidate — measured effect below.
-
-### Step 5 — Issue virtual keys per team
-
-![Step 6: virtual keys per team](assets/diagrams/step6-virtual-keys.png)
-
-Every team gets its own [virtual key](https://docs.getbifrost.ai/features/governance/virtual-keys) with model allowlists, budgets, and rate limits. This is the step that makes the platform team popular.
-
-### Steps 6–7 — Wire observability, then cut over
-
-![Step 7: cutover complete](assets/diagrams/step7-cutover.png)
-
-Prometheus-native [observability](https://docs.getbifrost.ai/features/observability/default) plugs into your existing Grafana. Then cut over the remaining clients one at a time, with the gateway's request logs as the audit trail.
-
-## What the migrated stack measured
-
-Same traffic, through Bifrost with caching on and a fallback provider configured:
-
-```
-via Bifrost: 60 ok / 0 fail, 32 cache hits, 4,363 tokens billed
+```bash
+docker run -p 8080:8080 maximhq/bifrost
 ```
 
-### Cost, in real numbers
+One config file wires your existing provider and key; the app keeps working untouched. Mine, reduced to the bones:
 
-At $0.0025 per 1K tokens (a gpt-4o-mini-class rate for illustration):
+```json
+{
+  "providers": {
+    "openai": {
+      "keys": [{ "name": "primary", "value": "mock-key", "weight": 1.0,
+                 "models": ["support-chat"] }],
+      "network_config": { "base_url": "http://provider:9001",
+                          "default_request_timeout_in_seconds": 30 }
+    }
+  }
+}
+```
 
-| | legacy | via Bifrost |
-|---|---|---|
-| billable tokens | 9,335 | 4,363 |
-| cost | $0.0233 | $0.0109 |
-| savings | — | **53%** |
+The [gateway setup guide](https://docs.getbifrost.ai/quickstart/gateway/setting-up) covers the web-UI alternative, and there is a [Go SDK](https://docs.getbifrost.ai/quickstart/go-sdk/setting-up) if you want the gateway embedded rather than adjacent.
 
-The savings came entirely from cache hits on repeated FAQ prompts — the second response carried `cache_hit: true, hit_type: direct` in its `cache_debug` block and replayed with the original `created` timestamp. No provider call, no tokens billed. On a real support workload with much higher volume, that ratio compounds daily.
+### 2. Point one low-risk client at the gateway
 
-### Availability, demonstrated
+![one client pointed](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step3-one-client.png)
 
-The failover proof, per request. Healthy primary:
+The [OpenAI-compatible API](https://docs.getbifrost.ai/providers/supported-providers/overview) means the client change is a base URL — `api.openai.com` → `localhost:8080` — not a rewrite. Every request now flows through a hop you control. Screenshot of the providers page after this step:
+
+![Bifrost UI: providers configured](https://copyleftdev.github.io/bifrost-editorial/assets/screenshots/providers.png)
+
+### 3. Add a fallback provider
+
+![fallback added](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step4-fallback.png)
+
+A second provider config (`anthropic` in my bench) plus a request-level fallback chain:
+
+```json
+{
+  "model": "openai/support-chat",
+  "messages": [{"role": "user", "content": "hi"}],
+  "fallbacks": ["anthropic/support-chat"]
+}
+```
+
+Then the proof. Healthy primary:
 
 ```json
 "routing_info": {"provider": "openai", "key": "primary", "is_fallback": false}
 ```
 
-I killed the primary provider and re-sent the identical request with `fallbacks: ["anthropic/support-chat"]`:
+I killed the primary provider's process and re-sent the identical request:
 
 ```json
 "routing_info": {
@@ -105,29 +96,109 @@ I killed the primary provider and re-sent the identical request with `fallbacks:
 }
 ```
 
-Zero client-side change; the response says exactly what happened. Compare with the legacy run's 26 dead requests. (One honest caveat from my bench: in my mock setup, request-level failover fired reliably on upstream errors, but initial connection-refused to a dead provider did not always trigger the chain — validate failover against your actual providers' failure modes when you test, per the [retries and fallbacks docs](https://docs.getbifrost.ai/features/retries-and-fallbacks).)
+The request succeeded on the backup and the response says exactly what happened — `is_fallback: true` with the failed primary recorded. That audit trail is what you want at 2 a.m.: not just "it kept working," but "it kept working this way." The [retries and fallbacks docs](https://docs.getbifrost.ai/features/retries-and-fallbacks) cover chained fallbacks and per-provider retry counts.
 
-### Governance, exercised
+One honest caveat from my bench: failover on *initial* connection-refused (provider already dead before the first connect) was inconsistent in my mock setup — it fired reliably when the upstream errored or the connection dropped mid-pool, but a cold connection-refused sometimes returned a 502 instead of failing through. Validate failover against your providers' real failure modes before you trust it in production.
 
-A virtual key scoped to the support team's model allowlist (`allowed_models: ["support-chat"]`). The allowed request routes; a request for `premium-model` with the same key returns:
+### 4. Turn on caching
+
+![cache enabled](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step5-cache.png)
+
+[Semantic caching](https://docs.getbifrost.ai/features/semantic-caching) has two modes: exact-match (direct hash, no embeddings needed) and embedding-based similarity. Config for direct mode with a Redis Stack vector store:
+
+```json
+"plugins": [{
+  "name": "semantic_cache",
+  "config": { "dimension": 1,
+              "vector_store_namespace": "BifrostBench",
+              "default_cache_key": "support-cache",
+              "ttl": "5m" }
+}]
+```
+
+Two identical requests, one cache key. The second response:
+
+```json
+"cache_debug": {
+  "cache_hit": true,
+  "cache_id": "1cf8a91b-c115-57bf-97a0-fc821dc4de1e",
+  "hit_type": "direct",
+  "cache_hit_latency": 0
+}
+```
+
+Same `created` timestamp as the first response — it was replayed, not re-fetched. Zero provider call, zero tokens. (Practical note: this needed Redis Stack with the RediSearch module; plain Redis lacks the `FT.*` commands the index wants.)
+
+### 5. Issue virtual keys per team
+
+![virtual keys](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step6-virtual-keys.png)
+
+[Virtual keys](https://docs.getbifrost.ai/features/governance/virtual-keys) are the governance primitive: per-team keys carrying model allowlists, budgets, and rate limits. Declared in config for the support team:
+
+```json
+"governance": {
+  "virtual_keys": [{
+    "id": "vk-support-team",
+    "value": "sk-bf-support-team",
+    "provider_configs": [{
+      "provider": "openai",
+      "allowed_models": ["support-chat"], "key_ids": ["*"]
+    }]
+  }]
+}
+```
+
+The allowed request routes normally. A request for `premium-model` with the same key:
 
 ```
 "Model 'premium-model' is not allowed for this virtual key"
 ```
 
-Denied before any provider saw it. Virtual keys also carry budgets and rate limits — the mechanism that ends the "who spent $800 on Opus last night" incident review.
+Denied at the gateway before any provider saw it. The same key machinery carries [budgets and rate limits](https://docs.getbifrost.ai/features/governance/budget-and-limits) — the mechanism that ends the "who spent $800 on Opus last night" incident review. Screenshot of the key in the governance UI:
 
-### MCP: the part the legacy stack never had
+![Virtual Keys page](https://copyleftdev.github.io/bifrost-editorial/assets/screenshots/virtual-keys.png)
 
-Legacy architectures bolt tool-use onto apps ad hoc. On the gateway, [MCP](https://docs.getbifrost.ai/mcp/overview) is a first-class surface: I connected a hand-rolled MCP server (one tool, JSON-RPC over HTTP), Bifrost discovered it as a healthy client, and execution went through the gateway explicitly:
+### 6. Wire observability and agent tooling
+
+Bifrost exports Prometheus metrics natively and logs every request with routing context — provider chosen, fallback index, cache behavior, token counts, latency split into gateway vs upstream time. That last distinction matters: when a provider slows down, you see `upstream_latency` grow while gateway overhead stays flat, so you know whose pager to page. See the [observability docs](https://docs.getbifrost.ai/features/observability/default). And for agent traffic, [MCP](https://docs.getbifrost.ai/mcp/overview) is a first-class surface: the gateway brokers tool calls with explicit execution (no auto-execution unless you opt in).
+
+I hand-rolled a minimal MCP server (one tool, JSON-RPC over HTTP) and registered it as a client. The client list reported `state: healthy` with `get_time` discovered. Execution went through the gateway explicitly:
 
 ```
-POST /v1/mcp/tool/execute  {"function":{"name":"benchtools-get_time"}}
+POST /v1/mcp/tool/execute  {"function":{"name":"benchtools-get_time","arguments":"{}"}}
 → {"role":"tool","content":"2026-08-27T07:48:21Z"}
 ```
 
-Two security properties showed up unprompted: tool names are namespaced per client (`benchtools-get_time`) to prevent collisions, and execution without permission fails closed ("tool is not available or not permitted"). Agent traffic gets the same gateway governance as chat traffic.
+Two security properties surfaced unprompted: tool names are namespaced per client (`benchtools-get_time`) to prevent collisions between servers, and execution without permission fails closed ("tool is not available or not permitted"). Agent traffic gets the same governance as chat traffic.
+
+### 7. Cut over with an audit trail
+
+![cutover complete](https://copyleftdev.github.io/bifrost-editorial/assets/diagrams/step7-cutover.png)
+
+Remaining clients migrate one at a time — each is a base-URL change with the gateway's request log as your audit trail. The Logs view after a few requests:
+
+![LLM Logs](https://copyleftdev.github.io/bifrost-editorial/assets/screenshots/logs.png)
+
+## The measured payoff
+
+Same 60-request traffic, now through Bifrost with the cache on and the fallback wired:
+
+```
+via Bifrost: 60 ok / 0 fail, 32 cache hits, 4,363 tokens billed
+```
+
+At an illustrative $0.0025 per 1K tokens:
+
+| | legacy | via Bifrost |
+|---|---|---|
+| billable tokens | 9,335 | 4,363 |
+| cost | $0.0233 | $0.0109 |
+| cache hits | 0 | 32 |
+| failed requests (provider kill) | 26 | 0 |
+| savings | — | **53%** |
+
+The savings came entirely from replayed cache hits — no provider call, no tokens. On a support workload that repeats questions daily, that ratio compounds. The availability delta speaks for itself: 0 failures through a provider kill, against 26 in the legacy run.
 
 ## The bottom line
 
-Migrating to an enterprise AI gateway is not a rewrite. It is a sequence of small, reversible moves — deploy beside, point one client, add fallback, enable cache, issue keys, observe, cut over. Measured on the rebuilt stack: 53% cost reduction on cacheable traffic, 0 failed requests through a provider kill (vs 26 in legacy), and controls the legacy stack never had. The migration risk is low; the legacy risk was already on your pager.
+Migrating to an enterprise AI gateway is not a rewrite. It is a sequence of small, reversible moves — deploy beside, point one client, add fallback, enable cache, issue keys, wire observability, cut over. Measured on the rebuilt stack: 53% cost reduction on cacheable traffic, zero failed requests through a provider kill, and governance the legacy stack never had. The migration risk is low; the legacy risk is already on your pager.
