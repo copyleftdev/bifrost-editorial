@@ -1,7 +1,7 @@
 ---
-title: Migrating from Legacy LLM Infrastructure to an Enterprise AI Gateway
+title: Migrating Legacy LLM Infrastructure to an AI Gateway
 published: false
-description: A hands-on migration — moving a support copilot off direct provider calls onto an enterprise AI gateway, with configs, screenshots, and measured cost results.
+description: A hands-on migration off direct provider calls onto an AI gateway — configs, screenshots, and measured cost results.
 tags: ai, llm, devops, tutorial
 ---
 
