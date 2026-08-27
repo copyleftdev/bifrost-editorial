@@ -2,7 +2,7 @@
   "articles": [
     {
       "slug": "choosing-enterprise-ai-gateway",
-      "title": "Choosing the right Enterprise AI Gateway to scale your LLM Workloads",
+      "title": "Migrating from Legacy LLM Infrastructure to an Enterprise AI Gateway",
       "status": "draft-ready-for-review",
       "client": "Maxim (Swapnoneel)",
       "fee_usd": 70,
@@ -10,16 +10,13 @@
       "draft_due": "weekend before publish",
       "platform": "dev.to",
       "primary_keyword": "enterprise AI gateway",
-      "required_links": [
-        "https://www.getmaxim.ai/bifrost",
-        "https://github.com/maximhq/bifrost",
-        "https://docs.getbifrost.ai/"
-      ],
-      "notes": "v3: migration narrative with measured cost table (53% savings on cacheable traffic, 26 fail legacy vs 0 fail via gateway), failover per-request proven twice, MCP + governance demos live. Honest caveat on connection-refused failover included. Bench artifacts in bench/. v3.1: 7 diagrams in assets/diagrams (PNG+SVG, style via architecture-diagram skill by Cocoon AI, MIT); embedded via PLACEHOLDER-ORG raw URLs \u2014 swap to real org after repo push.",
+      "repo": "https://github.com/copyleftdev/bifrost-editorial",
+      "pages_preview": "https://copyleftdev.github.io/bifrost-editorial/",
       "draft_path": "drafts/choosing-enterprise-ai-gateway.md",
       "research_path": "research/choosing-enterprise-ai-gateway.md",
-      "bench_path": "bench/bench-output.txt",
-      "verify_path": "verify/choosing-enterprise-ai-gateway.txt"
+      "bench_path": "bench/bench-migration.md",
+      "verify_path": "verify/choosing-enterprise-ai-gateway.txt",
+      "notes": "Full deliverables live: GitHub Pages preview at copyleftdev.github.io/bifrost-editorial/, private repo with bench/ research/ assets/ diagrams (7 PNGs) + article.md. All 15 external links (8 docs + 7 diagrams) verified 200. Cost table: 53% measured savings on FAQ traffic. Failover proven per-request. MCP + governance demonstrated."
     }
   ]
 }
